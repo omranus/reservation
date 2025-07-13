@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Réserver votre restaurant thématique | Book your Thematic restaurant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    .menu-choice {
+      margin-bottom: 10px;
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 20px auto;
+      max-width: 200px;
+    }
+    .lang-switch {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .lang-switch button {
+      margin: 0 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+    <div class="lang-switch">
+    <button onclick="setLanguage('fr')">Français</button>
+    <button onclick="setLanguage('en')">English</button>
+  </div>
+  <h2 id="formTitle">Réserver votre restaurant thématique</h2>
+  <form id="reservationForm">
+    <div class="form-group">
+      <label id="labelRestaurant" for="restaurant">Restaurant</label>
+      <select id="restaurant" name="restaurant" required>
+        <option value="">--Choisissez--</option>
+        <option value="pecheur">Le Pêcheur (fermé lundi)</option>
+        <option value="italien">L'Italien (fermé mercredi)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label id="labelDate" for="date">Date</label>
+      <input type="date" id="date" name="date" required>
+    </div>
+
+    <div class="form-group">
+      <label id="labelRoom" for="room">Numéro de chambre</label>
+      <input type="text" id="room" name="room" required>
+    </div>
+
+    <div class="form-group">
+      <label id="labelPax" for="pax">Nombre de personnes</label>
+      <input type="number" id="pax" name="pax" min="1" max="50" required>
+    </div>
+
+    <div id="menuSelection"></div>
+
+    <button type="submit" id="submitBtn">Réserver</button>
+  </form>
+
+  <div id="confirmation" style="display:none; margin-top: 20px; color: green;"></div>
+
+  <script>
+    const form = document.getElementById('reservationForm');
+    const paxInput = document.getElementById('pax');
+    const menuDiv = document.getElementById('menuSelection');
+    const confirmation = document.getElementById('confirmation');
+    const formTitle = document.getElementById('formTitle');
+    const labelRestaurant = document.getElementById('labelRestaurant');
+    const labelDate = document.getElementById('labelDate');
+    const labelRoom = document.getElementById('labelRoom');
+    const labelPax = document.getElementById('labelPax');
+    const submitBtn = document.getElementById('submitBtn');
+    const restaurantSelect = document.getElementById('restaurant');
+
+    let currentLang = 'fr';
+
+    const translations = {
+      fr: {
+        title: "Réserver votre restaurant thématique",
+        restaurant: "Restaurant",
+        date: "Date",
+        room: "Numéro de chambre",
+        pax: "Nombre de personnes",
+        submit: "Réserver",
+        closedAlert: "Ce restaurant est fermé ce jour-là. Veuillez choisir une autre date.",
+        success: "Réservation enregistrée avec succès !",
+        choose: "--Choisissez--",
+        options: ["Le Pêcheur (fermé lundi)", "L'Italien (fermé mercredi)"]
+      },
+      en: {
+        title: "Book your Thematic restaurant",
+        restaurant: "Restaurant",
+        date: "Date",
+        room: "Room number",
+        pax: "Number of guests",
+        submit: "Book",
+        closedAlert: "This restaurant is closed on that day. Please choose another date.",
+        success: "Booking successfully submitted!",
+        choose: "--Select--",
+        options: ["Le Pêcheur (closed Monday)", "L'Italien (closed Wednesday)"]
+      }
+    };
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+      formTitle.textContent = t.title;
+      labelRestaurant.textContent = t.restaurant;
+      labelDate.textContent = t.date;
+      labelRoom.textContent = t.room;
+      labelPax.textContent = t.pax;
+      submitBtn.textContent = t.submit;
+
+      restaurantSelect.innerHTML = `
+        <option value="">${t.choose}</option>
+        <option value="pecheur">${t.options[0]}</option>
+        <option value="italien">${t.options[1]}</option>
+      `;
+    }
+
+    paxInput.addEventListener('input', () => {
+      menuDiv.innerHTML = '';
+      const pax = parseInt(paxInput.value);
+      if (pax > 0 && pax <= 50) {
+        for (let i = 1; i <= pax; i++) {
+          menuDiv.innerHTML += `
+            <div class="menu-choice">
+              <label>${currentLang === 'fr' ? 'Personne' : 'Guest'} ${i} - ${currentLang === 'fr' ? 'Choix du menu' : 'Menu choice'} :</label>
+              <select name="menu${i}" required>
+                <option value="A">Menu A</option>
+                <option value="B">Menu B</option>
+              </select>
+            </div>
+          `;
+        }
+      }
+    });
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const restaurant = form.restaurant.value;
+      const date = new Date(form.date.value);
+      const jour = date.getDay();
+
+      if ((restaurant === 'pecheur' && jour === 1) || (restaurant === 'italien' && jour === 3)) {
+        alert(translations[currentLang].closedAlert);
+        return;
+      }
+
+      confirmation.textContent = translations[currentLang].success;
+      confirmation.style.display = 'block';
+      form.reset();
+      menuDiv.innerHTML = '';
+    });
+
+    // Initial language
+    setLanguage('fr');
+  </script>
+</body>
+</html>
